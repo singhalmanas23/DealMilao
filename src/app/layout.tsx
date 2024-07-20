@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "DealMilao",
   description: "Get the best price",
 };
+if (typeof window === 'undefined') {
+  require('../../lib/actions/cron');
+}
 
 export default function RootLayout({
   children,

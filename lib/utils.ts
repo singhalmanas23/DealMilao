@@ -10,7 +10,33 @@ const Notification = {
   }
   const THRESHOLD_PERCENTAGE=40;
 
-  export function extractPrice(...args: any){ for(const element of args){ const price = element.text().trim(); if(price){ return price.replace(/\D/g, ''); } } return ""; }
+  export function extractPrice(...elements: any) {
+    for (const element of elements) {
+      console.log('Processing element:', element); // Log the element being processed
+      const priceText = element.first().text().trim();
+      console.log('Extracted price text:', priceText); // Log the extracted text
+  
+      if (priceText) {
+        const cleanPrice = priceText.replace(/[^\d.]/g, '');
+        console.log('Clean price text (non-digits removed):', cleanPrice); // Log the cleaned price text
+  
+        let firstPrice;
+  
+        if (cleanPrice) {
+          firstPrice = cleanPrice.match(/\d+\.\d{2}/)?.[0];
+          console.log('Matched first price with decimals:', firstPrice); // Log the matched price with decimals
+        }
+  
+        const finalPrice = firstPrice || cleanPrice;
+        console.log('Final price to return:', finalPrice); // Log the final price to be returned
+        return finalPrice;
+      }
+    }
+  
+    console.log('No valid price found, returning empty string'); // Log if no price is found
+    return '';
+  }
+  
   
   
   
@@ -22,11 +48,9 @@ const Notification = {
   
   // Extracts description from two possible elements from amazon
   export function extractDescription($: any) {
-    // these are possible elements holding description of the product
+    // Selector for the feature bullets
     const selectors = [
-      ".a-unordered-list .a-list-item",
-      ".a-expander-content p",
-      // Add more selectors here if needed
+      "#feature-bullets .a-unordered-list .a-list-item",
     ];
   
     for (const selector of selectors) {
@@ -36,13 +60,18 @@ const Notification = {
           .map((_: any, element: any) => $(element).text().trim())
           .get()
           .join("\n");
-        return textContent;
+  
+        // Split text content into lines and join only the first 10 lines
+        const lines = textContent.split("\n").slice(0, 10);
+        return lines.join("\n");
       }
     }
   
     // If no matching elements were found, return an empty string
     return "";
   }
+  
+  
   
   export function getHighestPrice(priceList: PriceHistoryItem[]) {
     let highestPrice = priceList[0];

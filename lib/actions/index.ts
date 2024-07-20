@@ -1,12 +1,11 @@
-"use server"
 
-import { revalidatePath } from "next/cache";
-import Product from "../models/products.models";
+ import { scrapeAmazonProduct } from "../scraper";
 import { connectToDB } from "../mongoose";
-import { scrapeAmazonProduct } from "../scraper";
+import Product from "../models/products.models";
 import { getAveragePrice, getHighestPrice, getLowestPrice } from "../utils";
-import { User } from "../../types/index";
+import { User } from "../../types";
 import { generateEmailBody, sendEmail } from "../nodemailer";
+import { revalidatePath } from "next/cache";
 
 export async function scrapeAndStoreProduct(productUrl: string) {
   if (!productUrl) return;
@@ -25,7 +24,7 @@ export async function scrapeAndStoreProduct(productUrl: string) {
     if (existingProduct) {
       const updatedPriceHistory: any = [
         ...existingProduct.priceHistory,
-        { price: scrapedProduct.currentPrice },
+        { price: scrapedProduct.currentPrice }
       ];
 
       product = {
@@ -40,31 +39,26 @@ export async function scrapeAndStoreProduct(productUrl: string) {
     const newProduct = await Product.findOneAndUpdate(
       { url: scrapedProduct.url },
       product,
-      { upsert: true, new: true, lean: true }
-    );
+      { upsert: true, new: true,lean:true }
+    ).lean();
 
-    if (newProduct) {
-      const plainProduct = JSON.parse(JSON.stringify(newProduct)); // Convert to plain object
-      console.log('New Product:', plainProduct);
-      revalidatePath(`/products/${plainProduct._id}`); // Assuming revalidatePath is a function that takes a string path
+    revalidatePath(`/products/${newProduct._id}`);
+    return newProduct;
 
-      return plainProduct;
-    } else {
-      throw new Error('Failed to create/update product: New product is null');
-    }
+    
+
   } catch (error: any) {
     throw new Error(`Failed to create/update product: ${error.message}`);
   }
 }
 
-
 export async function getProductById(productId: string) {
   try {
-    connectToDB();
+    await connectToDB();
 
     const product = await Product.findOne({ _id: productId });
 
-    if(!product) return null;
+    if (!product) return null;
 
     return product;
   } catch (error) {
@@ -74,7 +68,7 @@ export async function getProductById(productId: string) {
 
 export async function getAllProducts() {
   try {
-    connectToDB();
+    await connectToDB();
 
     const products = await Product.find();
 
@@ -86,11 +80,11 @@ export async function getAllProducts() {
 
 export async function getSimilarProducts(productId: string) {
   try {
-    connectToDB();
+    await connectToDB();
 
     const currentProduct = await Product.findById(productId);
 
-    if(!currentProduct) return null;
+    if (!currentProduct) return null;
 
     const similarProducts = await Product.find({
       _id: { $ne: productId },
@@ -106,11 +100,11 @@ export async function addUserEmailToProduct(productId: string, userEmail: string
   try {
     const product = await Product.findById(productId);
 
-    if(!product) return;
+    if (!product) return;
 
     const userExists = product.users.some((user: User) => user.email === userEmail);
 
-    if(!userExists) {
+    if (!userExists) {
       product.users.push({ email: userEmail });
 
       await product.save();
