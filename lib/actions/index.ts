@@ -42,9 +42,25 @@ export async function scrapeAndStoreProduct(productUrl: string) {
       { upsert: true, new: true,lean:true }
     ).lean();
 
-    revalidatePath(`/products/${newProduct._id}`);
-    return newProduct;
-
+    if (Array.isArray(newProduct)) {
+      if (newProduct.length > 0) {
+          const product = newProduct[0]; // Or iterate over the array as needed
+          revalidatePath(`/products/${product._id}`);
+          return product;
+      } else {
+          // Handle the case where the array is empty
+          console.error('Error: newProduct array is empty');
+          return null;
+      }
+  } else if (newProduct && typeof newProduct === 'object') {
+      // Handle the case where newProduct is a single object
+      revalidatePath(`/products/${newProduct._id}`);
+      return newProduct;
+  } else {
+      // Handle the case where newProduct is null or not an object
+      console.error('Error: newProduct is null or not an object');
+      return null;
+  }
     
 
   } catch (error: any) {
