@@ -4,10 +4,10 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-let isConnected = false; // Variable to track the connection status
+let isConnected = false; 
 
 export const connectToDB = async () => {
-  mongoose.set('strictQuery', false);
+  mongoose.set('strictQuery', true);
 
   if (!process.env.MONGO_URL) {
     console.log('MONGODB_URL is not defined');

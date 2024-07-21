@@ -8,7 +8,8 @@ import {
 import { FormEvent, useState } from "react";
 import Image from "next/image";
 import { addUserEmailToProduct } from "../../lib/actions";
-
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface Props {
   productId: string;
@@ -22,10 +23,16 @@ export default function Modal({ productId }: Props) {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await addUserEmailToProduct(productId, userEmail);
-    setIsSubmitting(false);
-    setuserEmail("");
-    closeModal();
+    try {
+      await addUserEmailToProduct(productId, userEmail);
+      toast.success("Please check your email!");
+      setuserEmail("");
+      closeModal();
+    } catch (error) {
+      toast.error("Failed to add email. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const openModal = () => setIsOpen(true);
@@ -118,6 +125,7 @@ export default function Modal({ productId }: Props) {
           </DialogPanel>
         </div>
       </Dialog>
+      <ToastContainer position="top-center" theme="dark" />
     </>
   );
 }

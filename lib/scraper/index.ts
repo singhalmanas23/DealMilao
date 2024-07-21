@@ -34,7 +34,7 @@ export async function scrapeAmazonProduct(url: string) {
     const title = $('#productTitle').text().trim();
 
     // Log the title to help debug
-    console.log('Product Title:', title);
+    //console.log('Product Title:', title);
 
     if (!title) {
       throw new Error('Unable to fetch title');
@@ -87,8 +87,8 @@ export async function scrapeAmazonProduct(url: string) {
       highestPrice: Number(originalPrice) || Number(currentPrice),
       averagePrice: Number(currentPrice) || Number(originalPrice),
     };
-     console.log(currentPrice);
-     console.log(originalPrice);
+    //  console.log(currentPrice);
+    //  console.log(originalPrice);
     // Log the data
     //console.log(data);
 

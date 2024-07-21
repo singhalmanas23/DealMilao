@@ -1,8 +1,9 @@
 "use client"
-
 import { scrapeAndStoreProduct } from '../../lib/actions/index';
 import { FormEvent, useState } from 'react';
 import Link from 'next/link';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const isValidAmazonProductURL = (url: string) => {
   try {
@@ -40,13 +41,14 @@ const Searchbar = () => {
 
       // Scrape the product page
       const product = await scrapeAndStoreProduct(searchPrompt);
-      console.log('Product:', product); // Log the product
+      //console.log('Product:', product); // Log the product
       if (Array.isArray(product)) {
         // Handle the case where product is an array
         if (product.length > 0) {
           const firstProduct = product[0];
           if ('_id' in firstProduct) {
             setProductId(firstProduct._id as string); 
+            toast.success("Product fetched successfully");
           } else {
             console.error('Product ID is missing in the first product');
           }
@@ -55,6 +57,7 @@ const Searchbar = () => {
         }
       } else if (product && '_id' in product) {
         setProductId((product as { _id: string })._id); 
+        toast.success("Product fetched successfully");
       } else {
         console.error('Product ID is missing');
       }
@@ -66,6 +69,8 @@ const Searchbar = () => {
   }
 
   return (
+    <>
+    
     <form 
       className="flex flex-wrap gap-4 mt-12" 
       onSubmit={handleSubmit}
@@ -92,6 +97,8 @@ const Searchbar = () => {
         </Link>
       )}
     </form>
+    <ToastContainer position='top-center' theme='dark'/>
+    </>
   )
 }
 

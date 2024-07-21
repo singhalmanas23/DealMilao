@@ -1,5 +1,5 @@
-
- import { scrapeAmazonProduct } from "../scraper";
+"use server"
+import { scrapeAmazonProduct } from "../scraper";
 import { connectToDB } from "../mongoose";
 import Product from "../models/products.models";
 import { getAveragePrice, getHighestPrice, getLowestPrice } from "../utils";
